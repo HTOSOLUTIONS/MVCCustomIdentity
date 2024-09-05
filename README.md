@@ -7,6 +7,7 @@ The objective is to take the cookie cutter project from .NET and make the follow
 3. Implement custom table names and properties in the ApplicationDbContext.cs.
 4. Implement a custom **IUserClaimsPrincipalFactory<IdentityUser>**
 
+## Starting With Program.cs
 **AddDefaultIdentity** which is part of the .NET project template does not accept **IdentityRole**.  
 
 So to implement **IdentityRole**, 
@@ -25,9 +26,16 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddDefaultUI()
     .AddDefaultTokenProviders();
 ```
+# Steps to Customize the Identity entities
+The following custom models were manually created.
+| Class | Implements |
+|--|--|
+| AppRole.cs | IdentityRole<int> |
 
 
-## Alternative to AddDefaultUI()
+
+
+# Alternative to AddDefaultUI()
 The AddDefaultUI injection for AddIdentity (see Program.cs) provides a login page and controller action (not visible in the Solution Explorer) for logging in.  If you don't want to do this, you can create your own view for Login and your own HTTPGet and HTTPPost controller actions for login.
 
 Some ideas to manually handle Login from the HTTPPost would be:
