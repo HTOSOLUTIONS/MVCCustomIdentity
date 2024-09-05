@@ -7,7 +7,62 @@ The objective is to take the cookie cutter project from .NET and make the follow
 3. Implement custom table names and properties in the ApplicationDbContext.cs.
 4. Implement a custom **IUserClaimsPrincipalFactory<IdentityUser>**
 
-## Starting With Program.cs
+# Steps to Implement the custom Identity entities
+## Manually Create Models
+The following custom models were manually created.  There is nothing magical about the names used.  But there is one big caveat.  When these classes are injected into ApplicationDbContext (see below), the TKey type for all of them must be the same and they must match TKey in the ApplicationDbContext implementation.
+
+| Class | Implements |
+|--|--|
+| AppRole.cs | IdentityRole<int> |
+| AppUser.cs | IdentityUser<int> |
+| RoleClaim.cs | IdentityRoleClaim<in> |
+| UserClaim.cs | IdentityUserClaim<int> |
+| UserLogin.cs | IdentityUserLogin<int> |
+| UserRole.cs | IdentityUserRole<int> |
+| UserToken.cs | IdentityUserToken<int> |
+
+
+## Inject Models in ApplicationDbContext
+
+```
+    public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, int,
+        UserClaim<AppUser>, UserRole<AppUser, AppRole>, UserLogin<AppUser>,
+        RoleClaim<AppRole>, UserToken<AppUser>>
+
+```
+## Customize OnModelCreating
+At this point, you can go ahead and run Add--Migration for EntityFrameworks.  And it will work.  But you will find that the table names and columns are going to be 100% identitical to just using IdentityUser without custom models.  So in order to have more control of the models, we manually edited OnModelCreating.  
+
+```
+    public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, int,
+        UserClaim<AppUser>, UserRole<AppUser, AppRole>, UserLogin<AppUser>,
+        RoleClaim<AppRole>, UserToken<AppUser>>
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+
+            base.OnModelCreating(builder);
+            
+        // See ApplicationDbContext.cs for details.
+
+```
+
+How did we know what can be done in here?  We got started by copying the code straight out of https://learn.microsoft.com/en-us/aspnet/core/security/authentication/customize-identity-model?view=aspnetcore-8.0.
+
+And at this point, if you want to use migrations to create the database, you can use 
+```
+PM> Add-Migration IdentitySchema
+```
+And that's how we ended up with the migrations added to the Migrations folder.
+
+
+## Modifying the Service Injection in Program.cs
 **AddDefaultIdentity** which is part of the .NET project template does not accept **IdentityRole**.  
 
 So to implement **IdentityRole**, 
@@ -21,18 +76,13 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 We use this...
 
 ```
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<AppUser, AppRole>(options => { options.SignIn.RequireConfirmedEmail = false; })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultUI()
     .AddDefaultTokenProviders();
+
+
 ```
-# Steps to Customize the Identity entities
-The following custom models were manually created.
-| Class | Implements |
-|--|--|
-| AppRole.cs | IdentityRole<int> |
-
-
 
 
 # Alternative to AddDefaultUI()
