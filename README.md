@@ -3,7 +3,9 @@ A **.NET** project that starts with **Individual** accounts.
 The objective is to take the cookie cutter project from .NET and make the following changes:
 
 1. Implement **IdentityRole**
-2. Implement a custom **IUserClaimsPrincipalFactory<IdentityUser>**
+2. Implement custom models for Identity entities (see the Models folder)
+3. Implement custom table names and properties in the ApplicationDbContext.cs.
+4. Implement a custom **IUserClaimsPrincipalFactory<IdentityUser>**
 
 **AddDefaultIdentity** which is part of the .NET project template does not accept **IdentityRole**.  
 
@@ -24,9 +26,11 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddDefaultTokenProviders();
 ```
 
-The AddDefaultUI injection for AddIdentity provides a login page and controller action (not visible in the Solution Explorer) for logging in.  If you don't want to do this, you can create your own view for Login and your own HTTPGet and HTTPPost controller actions for login.
 
-The keys to manually handling Login from the HTTPPost would be:
+## Alternative to AddDefaultUI()
+The AddDefaultUI injection for AddIdentity (see Program.cs) provides a login page and controller action (not visible in the Solution Explorer) for logging in.  If you don't want to do this, you can create your own view for Login and your own HTTPGet and HTTPPost controller actions for login.
+
+Some ideas to manually handle Login from the HTTPPost would be:
 
 In the controller constructor you will need to inject the following:
 
